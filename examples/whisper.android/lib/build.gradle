@@ -1,6 +1,9 @@
 plugins {
     id 'com.android.library'
-    id 'org.jetbrains.kotlin.android'
+    // NOTE: not applying 'org.jetbrains.kotlin.android' here (unlike upstream) -
+    // this project's AGP version auto-applies Kotlin support to modules with
+    // Kotlin sources, and explicitly re-applying it double-registers the
+    // 'kotlin' extension and crashes the build.
 }
 
 android {
@@ -49,11 +52,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
+    // NOTE: no kotlinOptions{} block here (unlike upstream) - this AGP version's
+    // built-in Kotlin support doesn't expose that old KGP-contributed DSL; matches
+    // :app, which also relies on compileOptions alone.
 
-    ndkVersion "25.2.9519653"
+    ndkVersion "28.2.13676358" // matches the NDK actually installed in this environment
     externalNativeBuild {
         cmake {
             path = file("src/main/jni/whisper/CMakeLists.txt")
@@ -70,4 +73,8 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
+    // NOTE: added locally (not upstream) - LibWhisper.kt uses kotlinx.coroutines.*
+    // but this module doesn't declare it; it only compiled in whisper.cpp's own
+    // multi-module demo because a sibling module happened to pull it in.
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1'
 }
